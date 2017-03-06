@@ -1,0 +1,121 @@
+# ----------
+# User Instructions:
+# 
+# Create a function optimum_policy() that returns
+# a grid which shows the optimum policy for robot
+# motion. This means there should be an optimum
+# direction associated with each navigable cell.
+# 
+# un-navigable cells must contain an empty string
+# WITH a space, as shown in the previous video.
+# Don't forget to mark the goal with a '*'
+
+# ----------
+
+grid = [[0, 1, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 1, 1, 0]]
+
+init = [0, 0]
+goal = [len(grid)-1, len(grid[0])-1]
+
+delta = [[-1, 0 ], # go up
+         [ 0, -1], # go left
+         [ 1, 0 ], # go down
+         [ 0, 1 ]] # go right
+
+delta_name = ['^', '<', 'v', '>']
+
+cost_step = 1 # the cost associated with moving from a cell to an adjacent one.
+
+# ----------------------------------------
+# modify code below
+# ----------------------------------------
+
+def optimum_policy():
+    value = [[99 for row in range(len(grid[0]))] for col in range(len(grid)) ]
+    closed = [[0 for row in range(len(grid[0]))] for col in range(len(grid))]
+    policy = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
+    
+    resign = False
+    g = 0
+    open = [[g, len(grid)-1, len(grid[0])-1]]
+    closed[len(grid)-1][len(grid[0])-1] = 1
+    value[len(grid)-1][len(grid[0])-1] = 0
+    policy[len(grid)-1][len(grid[0])-1] = '*'
+    
+    while not resign:
+        if len(open) == 0:
+            resign = True
+        else:
+            open.sort()
+            open.reverse()
+            next = open.pop()
+            g = next[0]
+            x = next[1]
+            y = next[2]
+        for i in range(len(delta)):
+            x2 = x + delta[i][0]
+            y2 = y + delta[i][1]
+            #print x2,y2
+            if (x2 >= 0 and y2 >= 0 and x2 < len(grid) and y2 < len(grid[0])):
+                if (closed[x2][y2] == 0 and grid[x2][y2] == 0):
+                    g2 = g + cost_step
+                    value[x2][y2] = g2
+                    if (i == 0 or i == 1):
+                        i += 2
+                    else:
+                        i -= 2
+                    policy[x2][y2] = delta_name[i]
+                    #print 'g2:', g2
+                    closed[x2][y2] = 1
+                    open.append([g2, x2, y2])
+                    #print open
+                    
+    for i in range(len(value)):
+        print value[i]
+    for i in range(len(value)):
+        print policy[i]
+    return policy # Make sure your function returns the expected grid.
+optimum_policy()
+
+##!!!! Bellow is the code suggested by the Professor.!!!!!##
+
+#def optimum_policy():
+#    value = [[99 for row in range(len(grid[0]))] for col in range(len(grid))]
+#    policy = [['' for row in range(len(grid[0]))] for col in range(len(grid))]
+#     
+#    change = True
+#    count = 0
+#    while change:
+#        change = False
+
+#        for x in range(len(grid)):
+#            for y in range(len(grid[0])):
+#                if goal[0] == x and goal[1] == y:
+#                    if value[x][y] > 0:
+#                        value[x][y] = 0
+#                        policy[x][y] = '*'
+#                        change = True
+#
+#                elif grid[x][y] == 0:
+#                    for a in range(len(delta)):
+#                        x2 = x + delta[a][0]
+#                        y2 = y + delta[a][1]
+#                        if x2 >= 0 and x2 < len(grid) and y2 >= 0 and y2 < len(grid[0]) and grid[x2][y2] == 0:
+#                            v2 = value[x2][y2] + cost_step
+                            #print 'value x2:', x2, 'value y2:', y2, 'value [x2][y2]', value[x2][y2],'vlaue[x][y]:',value[x][y],'v2:',v2,'COUNT:',count
+#                            count +=1
+#                            if v2 < value[x][y]:
+#                                change = True
+#                                #print v2
+#                                value[x][y] = v2
+#                                policy[x][y] = delta_name[a]
+#    #for i in range(len(value)):
+#         #print value[i]
+#    for i in range(len(policy)):
+#        print policy[i]
+#    return policy # Make sure your function returns the expected grid.
+#optimum_policy()

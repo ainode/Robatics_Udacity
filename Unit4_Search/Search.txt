@@ -1,0 +1,150 @@
+# ----------
+# User Instructions:
+# 
+# Implement the function optimum_policy2D() below.
+#
+# You are given a car in a grid with initial state
+# init = [x-position, y-position, orientation]
+# where x/y-position is its position in a given
+# grid and orientation is 0-3 corresponding to 'up',
+# 'left', 'down' or 'right'.
+#
+# Your task is to compute and return the car's optimal
+# path to the position specified in `goal'; where
+# the costs for each motion are as defined in `cost'.
+
+# EXAMPLE INPUT:
+
+# grid format:
+#     0 = navigable space
+#     1 = occupied space 
+grid = [[1, 1, 1, 0, 0, 0],
+        [1, 1, 1, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 1, 1],
+        [1, 1, 1, 0, 1, 1]]
+goal = [2, 0] # final position
+init = [4, 3, 0] # first 2 elements are coordinates, third is direction
+cost = [2, 1, 20] # the cost field has 3 values: right turn, no turn, left turn
+
+# EXAMPLE OUTPUT:
+# calling optimum_policy2D() should return the array
+# 
+# [[' ', ' ', ' ', 'R', '#', 'R'],
+#  [' ', ' ', ' ', '#', ' ', '#'],
+#  ['*', '#', '#', '#', '#', 'R'],
+#  [' ', ' ', ' ', '#', ' ', ' '],
+#  [' ', ' ', ' ', '#', ' ', ' ']]
+#
+# ----------
+
+
+# there are four motion directions: up/left/down/right
+# increasing the index in this array corresponds to
+# a left turn. Decreasing is is a right turn.
+
+forward = [[-1,  0], # go up
+           [ 0, -1], # go left
+           [ 1,  0], # go down
+           [ 0,  1]] # do right
+forward_name = ['up', 'left', 'down', 'right']
+
+# the cost field has 3 values: right turn, no turn, left turn
+action = [-1, 0, 1]
+action_name = ['R', '#', 'L']
+
+
+# ----------------------------------------
+# modify code below
+# ----------------------------------------
+
+
+
+def optimum_policy2D():
+    value = [[[999 for row in range(len(grid[0]))] for col in
+    range(len(grid))],
+    [[999 for row in range(len(grid[0]))] for col in range(len(grid))],
+    [[999 for row in range(len(grid[0]))] for col in range(len(grid))],
+    [[999 for row in range(len(grid[0]))] for col in range(len(grid))]]
+
+    expand = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
+    
+    x = init[0]
+    y = init[1]
+    g = 0
+    p = init[2]
+    # this is action
+    a = 0
+    open = [[g, x, y, p]]
+
+    span = [[x, y, x, y, a]]
+    
+    
+    found = False  # flag that is set when search is complet
+    resign = False # flag set if we can't find expand
+
+    while not found and not resign:
+        if len(open) == 0:
+            resign = True
+            return 'fail'
+        else:
+            open.sort()
+            open.reverse()
+            next = open.pop()
+            x = next[1]
+            y = next[2]
+            g = next[0]
+            p = next[3]
+            
+            if x == goal[0] and y == goal[1]:
+                found = True
+            else:
+                #go through allowed actions(right,no turn, left)
+                for i in range(len(action)):
+                    # choose new directions according to the previous direction
+                    d = (p + action[i])%4
+                    x2 = x + forward[d][0]
+                    y2 = y + forward[d][1]
+                    # see if it is within boundry of the grid.
+                    if x2 >= 0 and x2 < len(grid) and y2 >=0 and y2 < len(grid[0]):
+                        if grid[x2][y2] == 0: 
+                            move_cost = cost[(action.index(action[i]))]
+                            g2 = g + move_cost
+                            value[d][x2][y2] = g2
+                            #add it to the open list for future expantion
+                            open.append([g2, x2, y2, d])
+                            #add it to span for back tracking bellow
+                            span.append([x, y , x2, y2, i])
+            
+    span.reverse()
+    route = []
+    path = goal
+    for i in range(len(span)-1):
+        if (span[i][2]==path[0] and span[i][3]==path[1]):
+            if (sum(span[i]) >= 0):
+                x = span[i][2]-span[i][0]
+                y = span[i][3] - span[i][1]
+                expand[span[i][0]][span[i][1]] = action_name[span[i][4]] 
+                path = span[i]
+    expand[goal[0]][goal[1]] = '*'
+
+
+    for i in range(len(expand)):
+        print expand[i]
+    
+    return expand  # make sure you return the shortest path.
+optimum_policy2D()
+
+
+
+
+
+
+
+#def optimum_policy2D():
+#    for i in range(len(value)):
+#        print value[i]
+#    return policy2D # Make sure your function returns the expected grid.
+#optimum_policy2D()
+
+
